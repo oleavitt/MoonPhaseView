@@ -1,13 +1,20 @@
 import SwiftUI
 import SceneKit
 
-@available(iOS 14, macOS 11.0, *)
+@available(iOS 16, *)
 public struct MoonPhaseView: View {
+    @ObservedObject private var viewModel: MoonPhaseViewModel
+
+    public init(viewModel: MoonPhaseViewModel) {
+        self.viewModel = viewModel
+    }
+
     public var body: some View {
         SceneView(scene: createScene())
     }
 
     private func createScene() -> SCNScene {
+        print("createScene() called")
         let scene = SCNScene()
         scene.background.contents = UIColor.black
 
@@ -35,17 +42,13 @@ public struct MoonPhaseView: View {
         lightNode.position = SCNVector3(x: 0, y: 0, z: 1000)
         lightAtNode.addChildNode(lightNode)
         scene.rootNode.addChildNode(lightAtNode)
+        lightAtNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: percentVisibleToRadians(Float(viewModel.percentVisible)))
 
         let sphereNode = SCNNode(geometry: SCNSphere(radius: 4))
         let material = SCNMaterial()
         material.diffuse.contents = UIImage(named: "moon-map", in: Bundle.module, compatibleWith: nil) ?? UIColor.white
         sphereNode.geometry?.firstMaterial = material
         scene.rootNode.addChildNode(sphereNode)
-
-        lightAtNode.rotation = SCNVector4(x: 0, y: 1, z: 0, w: percentVisibleToRadians(70))
-
-//        let rotateAction = SCNAction.repeatForever(SCNAction.rotate(by: 252.0 * (.pi / 180.0), around: SCNVector3(x: 0, y: 1, z: 0), duration: 5))
-//        lightAtNode.runAction(rotateAction)
 
         return scene
     }
@@ -55,24 +58,28 @@ public struct MoonPhaseView: View {
     }
 }
 
-#Preview {
-    VStack {
-        HStack {
-            VStack {
-                Text("The Moon")
-                    .font(.title)
-                    .colorInvert()
-                    .frame(maxWidth: .infinity)
-                Spacer()
+struct MoonPhaseView_Preview: PreviewProvider {
+    static var previews: some View {
+        @StateObject var moonViewModel = MoonPhaseViewModel()
+        VStack {
+            HStack {
+                VStack {
+                    Text("The Moon")
+                        .font(.title)
+                        .colorInvert()
+                        .frame(maxWidth: .infinity)
+                    Spacer()
+                }
+                .padding(.vertical)
+                MoonPhaseView(viewModel: moonViewModel)
+                    .frame(width: 150)
             }
-            .padding(.vertical)
-            MoonPhaseView()
-                .frame(width: 150)
+            .frame(height: 150)
+            .background(Color.black)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular), style: .init())
+            Slider(value: $moonViewModel.percentVisible, in: -100...100)
+            Spacer()
         }
-        .frame(height: 150)
-        .background(Color.black)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular), style: .init())
-        Spacer()
+        .padding()
     }
-    .padding()
 }
