@@ -46,7 +46,7 @@ public struct MoonPhaseView: View {
 
         let sphereNode = SCNNode(geometry: SCNSphere(radius: 4))
         let material = SCNMaterial()
-        material.diffuse.contents = UIImage(named: "moon-map", in: Bundle.module, compatibleWith: nil) ?? UIColor.white
+        material.diffuse.contents = UIImage(named: "moon-map-hi", in: Bundle.module, compatibleWith: nil) ?? UIColor.white
         sphereNode.geometry?.firstMaterial = material
         scene.rootNode.addChildNode(sphereNode)
 
@@ -81,5 +81,6 @@ struct MoonPhaseView_Preview: PreviewProvider {
             Spacer()
         }
         .padding()
+        MoonPhaseView(viewModel: moonViewModel)
     }
 }
